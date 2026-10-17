@@ -29,35 +29,68 @@
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
+        .error-box {
+            max-width: 400px;
+            padding: 1.5rem;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            border-radius: 0.75rem;
+            color: #ef4444;
+        }
     </style>
 </head>
 <body>
-    <div class="spinner"></div>
-    <p>A redirecionar para o link original...</p>
+    <div id="loading">
+        <div class="spinner"></div>
+        <p>A redirecionar para o link original...</p>
+    </div>
+
+    <div id="error" style="display: none;" class="error-box">
+        <h3 style="margin-top:0;">Link não encontrado</h3>
+        <p id="error-msg">O link encurtado não existe ou expirou.</p>
+        <a href="../" style="color:#818cf8; display:inline-block; margin-top:1rem;">Voltar ao início</a>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-config.js"></script>
+    <script src="../supabase-config.js"></script>
     <script>
         async function redirect() {
-            // Extrai o código curto do final da URL
-            const pathParts = window.location.pathname.split('/');
-            const shortCode = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+            try {
+                const segments = window.location.pathname.split('/').filter(Boolean);
+                const shortCode = segments[segments.length - 1];
 
-            if (shortCode) {
+                console.log('Código curto detetado:', shortCode);
+
+                if (!shortCode || shortCode === 'encurtar-link' || shortCode === 's') {
+                    throw new Error('Código inválido');
+                }
+
                 const { data, error } = await supabaseClient
                     .from('links')
                     .select('original_url')
                     .eq('short_code', shortCode)
                     .maybeSingle();
 
+                if (error) {
+                    console.error('Erro do Supabase:', error);
+                    throw error;
+                }
+
                 if (data && data.original_url) {
                     window.location.href = data.original_url;
-                    return;
+                } else {
+                    showError('Este link curto não está registado na base de dados.');
                 }
+            } catch (err) {
+                console.error('Erro no redirecionamento:', err);
+                showError('Não foi possível carregar o link.');
             }
+        }
 
-            // Se não encontrar o link
-            document.body.innerHTML = '<h1>Link não encontrado</h1><p>O link encurtado não existe ou expirou.</p><a href="/" style="color:#818cf8;">Voltar ao início</a>';
+        function showError(msg) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-msg').textContent = msg;
+            document.getElementById('error').style.display = 'block';
         }
 
         redirect();
