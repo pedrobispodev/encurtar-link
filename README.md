@@ -106,16 +106,3 @@ No arquivo `style.css`, modifique as variáveis CSS no início:
 }
 ```
 
-## Limitações do Plano Gratuito
-
-- **Supabase Free Tier**: 500MB de banco de dados, 2GB de transferência/mês
-- **GitHub Pages**: 100GB de transferência/mês
-- Mais que suficiente para uso pessoal ou pequenos projetos
-
-## Suporte
-
-Se encontrar problemas, verifique:
-1. As chaves do Supabase estão corretas no `supabase-config.js`
-2. A tabela `links` foi criada com sucesso
-3. As políticas de segurança (RLS) estão ativas
-4. O site está publicado corretamente no GitHub Pages
